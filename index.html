@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>逆翻訳評価フォーム</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ==================== 開始画面 ==================== -->
+<div id="startScreen" class="screen">
+  <div class="start-card">
+    <h1>逆翻訳評価フォーム</h1>
+    <p class="lead">薬剤情報の多言語翻訳について、日本語原文と逆翻訳文（外国語→日本語に訳し戻したもの）を見比べて評価します。対象言語（英語・ネパール語等）が読めなくても評価できます。</p>
+
+    <div class="instructions">
+      <h2>評価の進め方</h2>
+      <ul>
+        <li>全180項目あります。1項目ずつ表示されるので、原文と逆翻訳文を見比べて回答してください。</li>
+        <li>他の評価者と相談せず、独立して評価してください（評価者間の一致度を調べるためです）。</li>
+        <li>回答はこの端末のブラウザに自動保存されます。途中で閉じても、同じブラウザで開けば続きから再開できます。</li>
+        <li>別の端末に移る場合は「バックアップ保存」でファイルを書き出し、「読み込み」で復元してください。</li>
+        <li>すべて終わったら「回答をダウンロード」でCSVファイルを書き出し、担当者へ送ってください。</li>
+      </ul>
+      <h2>Q7　原文との意味一致（必須・1〜5）</h2>
+      <ul>
+        <li>5：意味完全一致　4：ほぼ一致　3：一部ズレ　2：大きなズレ　1：意味が大きく異なる</li>
+      </ul>
+      <h2>Q8　危険な誤訳の有無（必須）</h2>
+      <ul>
+        <li>医療上の判断や患者の服薬行動に影響しうる誤り（用法・用量、禁忌、重要な注意事項、副作用、投与方法、薬剤名、数値・単位、頻度・期間などの誤り）がある場合は「あり」を選んでください。</li>
+      </ul>
+      <h2>Q9　誤訳の種類（Q8で「あり」を選んだ場合のみ・複数選択可）</h2>
+      <h2>Q10　コメント（任意）</h2>
+    </div>
+
+    <div class="evaluator-select">
+      <p><strong>あなたが担当する評価者を選んでください：</strong></p>
+      <div class="btn-row">
+        <button class="btn btn-lg" data-evaluator="A">評価者A</button>
+        <button class="btn btn-lg" data-evaluator="B">評価者B</button>
+      </div>
+      <p class="note">どちらを担当するかは、もう一人の評価者とあらかじめ決めておいてください。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== メイン画面 ==================== -->
+<div id="mainScreen" class="screen" style="display:none">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span id="evaluatorBadge" class="badge"></span>
+      <span id="progressText" class="progress-text"></span>
+    </div>
+    <div class="topbar-right">
+      <button id="btnOverview" class="btn btn-sm">一覧</button>
+      <button id="btnMenu" class="btn btn-sm">保存・書き出し</button>
+    </div>
+  </header>
+  <div class="progress-bar-outer"><div id="progressBarInner" class="progress-bar-inner"></div></div>
+
+  <main id="itemCard" class="item-card"></main>
+
+  <nav class="bottombar">
+    <button id="btnPrev" class="btn btn-nav">← 前へ</button>
+    <button id="btnNextUnanswered" class="btn btn-nav btn-accent">未回答へ移動 →</button>
+    <button id="btnNext" class="btn btn-nav">次へ →</button>
+  </nav>
+</div>
+
+<!-- ==================== 一覧オーバーレイ ==================== -->
+<div id="overviewOverlay" class="overlay" style="display:none">
+  <div class="overlay-panel">
+    <div class="overlay-header">
+      <h2>項目一覧</h2>
+      <button id="btnCloseOverview" class="btn btn-sm">閉じる</button>
+    </div>
+    <div class="filters">
+      <select id="filterLang"><option value="">言語：すべて</option></select>
+      <select id="filterSection"><option value="">項目：すべて</option></select>
+      <select id="filterAnswered">
+        <option value="">回答状況：すべて</option>
+        <option value="done">回答済みのみ</option>
+        <option value="todo">未回答のみ</option>
+      </select>
+    </div>
+    <div id="overviewGrid" class="overview-grid"></div>
+  </div>
+</div>
+
+<!-- ==================== 保存・書き出しオーバーレイ ==================== -->
+<div id="menuOverlay" class="overlay" style="display:none">
+  <div class="overlay-panel overlay-panel-narrow">
+    <div class="overlay-header">
+      <h2>保存・書き出し</h2>
+      <button id="btnCloseMenu" class="btn btn-sm">閉じる</button>
+    </div>
+    <div class="menu-section">
+      <h3>提出用（すべて終わったら）</h3>
+      <button id="btnExportCsv" class="btn btn-block btn-primary">回答をダウンロード（CSV）</button>
+      <p class="note">このファイルを担当者に送ってください。未回答の項目があっても書き出せます。</p>
+    </div>
+    <div class="menu-section">
+      <h3>途中経過のバックアップ</h3>
+      <button id="btnExportJson" class="btn btn-block">バックアップを保存（JSON）</button>
+      <label class="btn btn-block" for="fileImport">バックアップを読み込む（JSON）</label>
+      <input type="file" id="fileImport" accept="application/json" style="display:none">
+      <p class="note">別の端末で続きから再開したいときや、ブラウザのデータが消えたときに使います。</p>
+    </div>
+    <div class="menu-section">
+      <button id="btnSwitchEvaluator" class="btn btn-block btn-danger">評価者を切り替える</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" style="display:none"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
