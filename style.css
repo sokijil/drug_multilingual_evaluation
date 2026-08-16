@@ -182,6 +182,7 @@ textarea#q10Input {
 .menu-section { margin-bottom: 18px; }
 .menu-section h3 { font-size: 0.9rem; margin: 0 0 8px; }
 .menu-section .note { font-size: 0.78rem; color: var(--text-muted); margin: 4px 0 0; }
+.backup-status { font-size: 0.85rem !important; color: var(--text) !important; margin-bottom: 8px !important; }
 
 .toast {
   position: fixed; bottom: 74px; left: 50%; transform: translateX(-50%);

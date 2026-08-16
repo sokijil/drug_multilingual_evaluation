@@ -19,8 +19,9 @@
       <ul>
         <li>全180項目あります。1項目ずつ表示されるので、原文と逆翻訳文を見比べて回答してください。</li>
         <li>他の評価者と相談せず、独立して評価してください（評価者間の一致度を調べるためです）。</li>
-        <li>回答はこの端末のブラウザに自動保存されます。途中で閉じても、同じブラウザで開けば続きから再開できます。</li>
-        <li>別の端末に移る場合は「バックアップ保存」でファイルを書き出し、「読み込み」で復元してください。</li>
+        <li>回答はこの端末のブラウザに自動保存されます。途中で閉じても、同じブラウザで開けば続きから再開できます（アカウント登録は不要です）。</li>
+        <li>iPhoneをお使いの場合、共有ボタン→「ホーム画面に追加」をしておくと、データが消えにくく開くのも早くなるのでおすすめです。</li>
+        <li>数日おきに「保存・書き出し」→「バックアップを保存」でファイルに書き出しておくと安心です。別の端末に移るときもこのファイルで復元できます。</li>
         <li>すべて終わったら「回答をダウンロード」でCSVファイルを書き出し、担当者へ送ってください。</li>
       </ul>
       <h2>Q7　原文との意味一致（必須・1〜5）</h2>
@@ -103,10 +104,11 @@
     </div>
     <div class="menu-section">
       <h3>途中経過のバックアップ</h3>
+      <p id="lastBackupText" class="note backup-status"></p>
       <button id="btnExportJson" class="btn btn-block">バックアップを保存（JSON）</button>
       <label class="btn btn-block" for="fileImport">バックアップを読み込む（JSON）</label>
       <input type="file" id="fileImport" accept="application/json" style="display:none">
-      <p class="note">別の端末で続きから再開したいときや、ブラウザのデータが消えたときに使います。</p>
+      <p class="note">別の端末で続きから再開したいときや、ブラウザのデータが消えたときに使います。回答は自動保存されますが、iPhoneのSafariは7日間開かないとデータを消すことがあるため、数日おきにこの「バックアップを保存」もお願いします。</p>
     </div>
     <div class="menu-section">
       <button id="btnSwitchEvaluator" class="btn btn-block btn-danger">評価者を切り替える</button>

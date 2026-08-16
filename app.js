@@ -15,11 +15,14 @@ const Q7_OPTIONS = [
   { v: 1, label: "1：意味が大きく異なる" },
 ];
 
+const BACKUP_REMINDER_INTERVAL = 15; // この件数だけ新規回答したらバックアップを促す
+
 let ITEMS = [];
 let evaluator = null;         // "A" | "B"
 let answers = {};             // itemId -> {Q7, Q8, Q9:[...], Q10}
 let currentIndex = 0;
-let overviewFilter = { lang: "", section: "", answered: "" };
+let lastBackupAt = null;              // 最終バックアップ日時（ms epoch）
+let answeredCountAtCheckpoint = 0;    // 直近のバックアップ／リマインド時点の回答数
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -30,12 +33,12 @@ function loadEvaluatorState(letter) {
     const raw = localStorage.getItem(storageKey(letter));
     if (raw) return JSON.parse(raw);
   } catch (e) { /* 破損データは無視して初期化 */ }
-  return { answers: {}, currentIndex: 0 };
+  return { answers: {}, currentIndex: 0, lastBackupAt: null, answeredCountAtCheckpoint: 0 };
 }
 
 function saveState() {
   localStorage.setItem(storageKey(evaluator),
-    JSON.stringify({ answers, currentIndex }));
+    JSON.stringify({ answers, currentIndex, lastBackupAt, answeredCountAtCheckpoint }));
 }
 
 function emptyAnswer() { return { Q7: null, Q8: null, Q9: [], Q10: "" }; }
@@ -79,6 +82,8 @@ function selectEvaluator(letter) {
   const st = loadEvaluatorState(letter);
   answers = st.answers || {};
   currentIndex = Math.min(st.currentIndex || 0, ITEMS.length - 1);
+  lastBackupAt = st.lastBackupAt || null;
+  answeredCountAtCheckpoint = st.answeredCountAtCheckpoint || 0;
 
   $("#startScreen").style.display = "none";
   $("#mainScreen").style.display = "block";
@@ -195,10 +200,30 @@ function renderItem(index) {
 function refreshProgress() {
   $("#progressText").textContent =
     `${currentIndex + 1} / ${ITEMS.length}（回答済み ${countAnswered()}）`;
+  checkBackupReminder();
 }
 
 function countAnswered() {
   return ITEMS.filter((it) => isAnswered(it.id)).length;
+}
+
+function checkBackupReminder() {
+  const answered = countAnswered();
+  if (answered - answeredCountAtCheckpoint >= BACKUP_REMINDER_INTERVAL) {
+    answeredCountAtCheckpoint = answered;
+    saveState();
+    showToast("こまめに「保存・書き出し」→「バックアップを保存」をおすすめします", 4000);
+  }
+}
+
+function formatLastBackup() {
+  if (!lastBackupAt) return "まだバックアップを保存していません";
+  const mins = Math.round((Date.now() - lastBackupAt) / 60000);
+  if (mins < 1) return "最終バックアップ：たった今";
+  if (mins < 60) return `最終バックアップ：${mins}分前`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `最終バックアップ：${hours}時間前`;
+  return `最終バックアップ：${Math.round(hours / 24)}日前`;
 }
 
 /* ---------------- 一覧オーバーレイ ---------------- */
@@ -263,7 +288,10 @@ function renderOverviewGrid() {
 /* ---------------- 保存・書き出しメニュー ---------------- */
 
 function bindMenu() {
-  $("#btnMenu").addEventListener("click", () => { $("#menuOverlay").style.display = "flex"; });
+  $("#btnMenu").addEventListener("click", () => {
+    $("#lastBackupText").textContent = formatLastBackup();
+    $("#menuOverlay").style.display = "flex";
+  });
   $("#btnCloseMenu").addEventListener("click", () => { $("#menuOverlay").style.display = "none"; });
   $("#menuOverlay").addEventListener("click", (e) => {
     if (e.target.id === "menuOverlay") $("#menuOverlay").style.display = "none";
@@ -301,6 +329,7 @@ function exportCsv() {
     rows.push(row.map(csvField).join(","));
   });
   downloadBlob(`評価回答_${evaluator}.csv`, BOM + rows.join("\r\n"), "text/csv;charset=utf-8");
+  recordBackup();
   showToast(`評価回答_${evaluator}.csv を保存しました`);
 }
 
@@ -308,7 +337,15 @@ function exportJson() {
   const payload = { evaluator, exportedAt: new Date().toISOString(), answers };
   downloadBlob(`評価バックアップ_${evaluator}.json`, JSON.stringify(payload, null, 1),
     "application/json");
+  recordBackup();
   showToast(`評価バックアップ_${evaluator}.json を保存しました`);
+}
+
+function recordBackup() {
+  lastBackupAt = Date.now();
+  answeredCountAtCheckpoint = countAnswered();
+  saveState();
+  $("#lastBackupText").textContent = formatLastBackup();
 }
 
 function importJson(e) {
@@ -351,12 +388,12 @@ function escapeHtml(s) {
 }
 
 let toastTimer = null;
-function showToast(msg) {
+function showToast(msg, durationMs) {
   const el = $("#toast");
   el.textContent = msg;
   el.style.display = "block";
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.style.display = "none"; }, 2500);
+  toastTimer = setTimeout(() => { el.style.display = "none"; }, durationMs || 2500);
 }
 
 init();
