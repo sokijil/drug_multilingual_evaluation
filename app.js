@@ -56,7 +56,7 @@ function isAnswered(id) {
 /* ---------------- 初期化 ---------------- */
 
 async function init() {
-  const res = await fetch("items.json");
+  const res = await fetch("items.json?v=20260904b");
   ITEMS = await res.json();
 
   bindStartScreen();
