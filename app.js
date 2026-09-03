@@ -157,6 +157,18 @@ function renderItem(index) {
 
     <div class="q-block">
       <h3>Q8　危険な誤訳の有無 <span class="q-required">必須</span></h3>
+      <details class="q-help">
+        <summary>「危険な誤訳」とは？</summary>
+        <p>医療上の判断や患者の服薬行動に影響しうる誤りを「危険な誤訳」とします。次のいずれかの誤りが該当します。</p>
+        <ul>
+          <li>用法・用量、投与方法</li>
+          <li>禁忌、重要な注意事項</li>
+          <li>副作用、適応・効能</li>
+          <li>薬剤名、数値・単位</li>
+          <li>頻度・期間などの時間情報</li>
+          <li>意味の逆転（可 ↔ 不可 など）</li>
+        </ul>
+      </details>
       <div class="q8-options">
         <label><input type="radio" name="q8" value="0" ${a.Q8 === 0 ? "checked" : ""}><span>0：なし</span></label>
         <label><input type="radio" name="q8" value="1" ${a.Q8 === 1 ? "checked" : ""}><span>1：あり</span></label>
