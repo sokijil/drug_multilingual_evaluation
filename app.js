@@ -18,7 +18,7 @@ const Q7_OPTIONS = [
 const BACKUP_REMINDER_INTERVAL = 15; // この件数だけ新規回答したらバックアップを促す
 
 let ITEMS = [];
-let evaluator = null;         // "A" | "B"
+let evaluator = null;         // "A" | "B" | "C"
 let answers = {};             // itemId -> {Q7, Q8, Q9:[...], Q10}
 let currentIndex = 0;
 let lastBackupAt = null;              // 最終バックアップ日時（ms epoch）
@@ -65,7 +65,7 @@ async function init() {
   bindMenu();
 
   const lastEvaluator = localStorage.getItem("evalForm_evaluator");
-  if (lastEvaluator === "A" || lastEvaluator === "B") {
+  if (lastEvaluator === "A" || lastEvaluator === "B" || lastEvaluator === "C") {
     selectEvaluator(lastEvaluator);
   }
 }
